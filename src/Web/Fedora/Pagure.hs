@@ -13,6 +13,7 @@ module Web.Fedora.Pagure
   , pagureListProjects
   , pagureListProjectIssues
   , pagureListGitBranches
+  , pagureListGitBranchesWithCommits
   , pagureListUsers
   , pagureUserInfo
   , pagureListGroups
@@ -84,10 +85,28 @@ pagureListProjectIssues server repo params = do
   let path = repo </> "issues"
   queryPagure server path params
 
-pagureListGitBranches :: String -> String -> Query -> IO Value
-pagureListGitBranches server repo params = do
+-- | List repo branches
+--
+-- https://pagure.io/api/0/#projects-tab
+pagureListGitBranches :: String -> String -> IO (Either String [String])
+pagureListGitBranches server repo = do
   let path = repo </> "git/branches"
-  queryPagure server path params
+  res <- queryPagureSingle server path []
+  return $ case res of
+    Left e -> Left e
+    Right v -> Right $ v ^.. key (T.pack "branches") . values . _String & map T.unpack
+
+-- | List repo branches with commits
+--
+-- https://pagure.io/api/0/#projects-tab
+pagureListGitBranchesWithCommits :: String -> String -> IO (Either String Object)
+pagureListGitBranchesWithCommits server repo = do
+  let path = repo </> "git/branches"
+      params = makeKey "with_commits" "1"
+  res <- queryPagureSingle server path params
+  return $ case res of
+    Left e -> Left e
+    Right v -> Right $ v ^. key (T.pack "branches") . _Object
 
 -- | List users
 --
