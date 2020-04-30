@@ -18,6 +18,7 @@ module Web.Fedora.Pagure
   , pagureListGroups
   , pagureProjectGitURLs
   , queryPagure
+  , queryPagureSingle
   , makeKey
   , makeItem
   , maybeKey
@@ -43,6 +44,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Char8 as B
 import Data.Maybe
 import Data.Text (Text)
+import qualified Data.Text as T
 import Network.HTTP.Simple
 import System.FilePath ((</>))
 
@@ -61,10 +63,10 @@ type QueryItem = (ByteString, Maybe ByteString)
 -- `pagureProjectInfo server "<namespace>/<repo>"`
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureProjectInfo :: String -> String -> IO Value
+pagureProjectInfo :: String -> String -> IO (Either String Value)
 pagureProjectInfo server project = do
   let path = project
-  queryPagure server path []
+  queryPagureSingle server path []
 
 -- | List projects
 --
@@ -99,10 +101,10 @@ pagureListUsers server pat = do
 -- | User information
 --
 -- https://pagure.io/api/0/#users-tab
-pagureUserInfo :: String -> String -> Query -> IO Value
+pagureUserInfo :: String -> String -> Query -> IO (Either String Value)
 pagureUserInfo server user params = do
   let path = "user" </> user
-  queryPagure server path params
+  queryPagureSingle server path params
 
 -- | List groups
 --
@@ -116,10 +118,10 @@ pagureListGroups server mpat paging = do
 -- | Project Git URLs
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureProjectGitURLs :: String -> String -> IO Value
+pagureProjectGitURLs :: String -> String -> IO (Either String Value)
 pagureProjectGitURLs server repo = do
   let path = repo </> "git/urls"
-  queryPagure server path []
+  queryPagureSingle server path []
 
 
 -- | low-level query
@@ -129,6 +131,18 @@ queryPagure server path params = do
   req <- setRequestQueryString params <$> parseRequest url
   -- putStrLn $ url ++ B.unpack (queryString req)
   getResponseBody <$> httpJSON req
+
+-- | single query
+queryPagureSingle :: String -> String -> Query -> IO (Either String Value)
+queryPagureSingle server path params = do
+  let url = "https://" ++ server </> "api/0" </> path
+  req <- setRequestQueryString params <$> parseRequest url
+  -- putStrLn $ url ++ B.unpack (queryString req)
+  res <- getResponseBody <$> httpJSON req
+  if isJust (res ^? key "error") then
+    return $ Left (res ^. key "error" . _String & T.unpack)
+    else
+    return $ Right res
 
 -- | Maybe create a query key
 maybeKey :: String -> Maybe String -> Query
