@@ -80,10 +80,10 @@ pagureListProjects server params = do
 -- | List project issues
 --
 -- https://pagure.io/api/0/#issues-tab
-pagureListProjectIssues :: String -> String -> Query -> IO Value
+pagureListProjectIssues :: String -> String -> Query -> IO (Either String Value)
 pagureListProjectIssues server repo params = do
   let path = repo </> "issues"
-  queryPagure server path params
+  queryPagureSingle server path params
 
 -- | List repo branches
 --
