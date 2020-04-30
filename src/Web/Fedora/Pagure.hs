@@ -9,7 +9,8 @@ Pagure REST client library
 -}
 
 module Web.Fedora.Pagure
-  ( pagureListProjects
+  ( pagureProjectInfo
+  , pagureListProjects
   , pagureListProjectIssues
   , pagureListGitBranches
   , pagureListUsers
@@ -57,6 +58,17 @@ type Query = [(ByteString, Maybe ByteString)]
 #else
 type QueryItem = (ByteString, Maybe ByteString)
 #endif
+
+-- | Project info
+--
+-- `pagureProjectInfo server "<repo>"`
+-- `pagureProjectInfo server "<namespace>/<repo>"`
+--
+-- https://pagure.io/api/0/#projects-tab
+pagureProjectInfo :: String -> String -> IO Value
+pagureProjectInfo server project = do
+  let path = project
+  queryPagure server path []
 
 -- | List projects
 --
