@@ -34,11 +34,7 @@ import Data.Aeson.Lens
 import Lens.Micro
 import Lens.Micro.Aeson
 #endif
-#if (defined(VERSION_aeson_pretty))
-import Data.Aeson.Encode.Pretty
-import qualified Data.ByteString.Lazy.Char8 as BL
-import Network.HTTP.Conduit (queryString)
-#endif
+--import Network.HTTP.Conduit (queryString)
 import Data.Aeson.Types
 #if (defined(MIN_VERSION_http_conduit) && MIN_VERSION_http_conduit(2,3,3))
 #else
@@ -131,14 +127,8 @@ queryPagure :: String -> String -> Query -> IO Value
 queryPagure server path params = do
   let url = "https://" ++ server </> "api/0" </> path
   req <- setRequestQueryString params <$> parseRequest url
-#if (defined(VERSION_aeson_pretty))
-  putStrLn $ url ++ B.unpack (queryString req)
-  res <- getResponseBody <$> httpJSON req
-  BL.putStrLn $ encodePretty res
-  return res
-#else
+  -- putStrLn $ url ++ B.unpack (queryString req)
   getResponseBody <$> httpJSON req
-#endif
 
 -- | Maybe create a query key
 maybeKey :: String -> Maybe String -> Query

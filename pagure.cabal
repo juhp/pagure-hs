@@ -28,10 +28,6 @@ flag microlens
   description:       Use smaller microlens instead of lens
   default:           False
 
-flag debug
-  description:       For pretty json output
-  default:           False
-
 library
   build-depends:       aeson
                      , base >= 4 && < 5
@@ -39,8 +35,6 @@ library
                      , filepath
                      , http-conduit
                      , text
-  if flag(debug)
-      build-depends:   aeson-pretty
   if flag(microlens)
       build-depends:   microlens, microlens-aeson
   else
