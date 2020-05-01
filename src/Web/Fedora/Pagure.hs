@@ -13,6 +13,7 @@ module Web.Fedora.Pagure
   , pagureListProjects
   , pagureListProjectIssues
   , pagureListProjectIssueTitles
+  , pagureProjectIssueInfo
   , pagureListGitBranches
   , pagureListGitBranchesWithCommits
   , pagureListUsers
@@ -105,6 +106,17 @@ pagureListProjectIssueTitles server repo params = do
         title <- obj .: "title"
         status <- obj .: "status"
         return (id',T.unpack title,status)
+
+-- | Issue information
+--
+-- https://pagure.io/api/0/#issues-tab
+pagureProjectIssueInfo :: String -> String -> Int -> IO (Either String Object)
+pagureProjectIssueInfo server repo issue = do
+  let path = repo </> "issue" </> show issue
+  res <- queryPagureSingle server path []
+  return $ case res of
+    Left e -> Left e
+    Right v -> Right $ v ^. _Object
 
 -- | List repo branches
 --
