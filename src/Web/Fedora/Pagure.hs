@@ -22,6 +22,8 @@ module Web.Fedora.Pagure
   , pagureProjectGitURLs
   , queryPagure
   , queryPagureSingle
+  , queryPagurePaged
+  , queryPagureCount
   , makeKey
   , makeItem
   , maybeKey
@@ -195,6 +197,25 @@ queryPagureSingle server path params = do
     return $ Left (res ^. key "error" . _String & T.unpack)
     else
     return $ Right res
+
+-- | count total number of hits
+queryPagureCount :: String -> String -> Query -> String -> IO (Maybe Integer)
+queryPagureCount server path params pagination = do
+  res <- queryPagure server path (params ++ makeKey "per_page" "1")
+  return $ res ^? key (T.pack pagination) . key "pages" . _Integer
+
+-- | get all pages of results
+--
+-- Note this can potentially download very large amount of data
+queryPagurePaged :: String -> String -> Query -> (String,String) -> IO [Value]
+queryPagurePaged server path params (pagination,paging) = do
+  res1 <- queryPagure server path (params ++ makeKey "per_page" "100")
+  let mpages = res1 ^? key (T.pack pagination) . key "pages" . _Integer
+  rest <- mapM nextPage [2..(fromMaybe 0 mpages)]
+  return $ res1 : rest
+  where
+    nextPage p =
+      queryPagure server path (params ++ makeKey "per_page" "100" ++ makeKey paging (show p))
 
 -- | Maybe create a query key
 maybeKey :: String -> Maybe String -> Query
