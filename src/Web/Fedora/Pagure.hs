@@ -218,7 +218,7 @@ queryPagurePaged server path params (pagination,paging) = do
     Nothing -> return []
     Just pages -> do
       when (pages > 1) $
-        hPutStrLn stderr $ show pages ++ " pages × " ++ maxPerPage ++ "results"
+        hPutStrLn stderr $ "receiving " ++ show pages ++ " pages × " ++ maxPerPage ++ " results..."
       rest <- mapM nextPage [2..pages]
       return $ res1 : rest
   where
