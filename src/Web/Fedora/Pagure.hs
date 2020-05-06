@@ -34,6 +34,7 @@ module Web.Fedora.Pagure
   , lookupKey'
   ) where
 
+import Control.Monad
 #if (defined(VERSION_lens_aeson))
 import Control.Lens
 import Data.Aeson.Lens
@@ -53,6 +54,7 @@ import Data.Text (Text)
 import qualified Data.Text as T
 import Network.HTTP.Simple
 import System.FilePath ((</>))
+import System.IO (hPutStrLn, stderr)
 
 #if (defined(MIN_VERSION_http_conduit) && MIN_VERSION_http_conduit(2,3,1))
 #else
@@ -209,10 +211,16 @@ queryPagureCount server path params pagination = do
 queryPagurePaged :: String -> String -> Query -> (String,String) -> IO [Value]
 queryPagurePaged server path params (pagination,paging) = do
   -- FIXME allow overriding per_page
-  res1 <- queryPagure server path (params ++ makeKey "per_page" "100")
+  let maxPerPage = "100"
+  res1 <- queryPagure server path (params ++ makeKey "per_page" maxPerPage)
   let mpages = res1 ^? key (T.pack pagination) . key "pages" . _Integer
-  rest <- mapM nextPage [2..(fromMaybe 0 mpages)]
-  return $ res1 : rest
+  case mpages of
+    Nothing -> return []
+    Just pages -> do
+      when (pages > 1) $
+        hPutStrLn stderr $ show pages ++ " pages × " ++ maxPerPage ++ "results"
+      rest <- mapM nextPage [2..pages]
+      return $ res1 : rest
   where
     nextPage p =
       queryPagure server path (params ++ makeKey "per_page" "100" ++ makeKey paging (show p))
