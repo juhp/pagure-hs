@@ -18,6 +18,7 @@ module Web.Fedora.Pagure
   , pagureListGitBranchesWithCommits
   , pagureListUsers
   , pagureUserInfo
+  , pagureUserRepos
   , pagureListGroups
   , pagureProjectGitURLs
   , queryPagure
@@ -241,3 +242,31 @@ lookupKey k = parseMaybe (.: k)
 lookupKey' :: FromJSON a => Text -> Object -> a
 lookupKey' k obj =
   fromMaybe (error ("no key: " ++ show k)) (lookupKey k obj)
+
+-- | list user's repos
+pagureUserRepos :: String -> String -> IO [Text]
+pagureUserRepos server user = do
+  let path = "user" </> user
+  pages <- queryPagurePaged server path [] ("repos_pagination", "repopage")
+  return $ concat $ map getRepos pages
+  where
+    getRepos :: Value -> [Text]
+    getRepos result =
+      let repos = result ^.. key (T.pack "repos") . values . _Object
+        in map getRepo repos
+
+    getRepo :: Object -> T.Text
+    getRepo repo =
+      case parseRepo repo of
+        Nothing -> error "parsing repo failed"
+        Just (mnamespace,name) ->
+          case mnamespace of
+            Nothing -> name
+            Just nm -> T.concat [nm, T.singleton '/', name]
+
+    parseRepo :: Object -> Maybe (Maybe Text, Text)
+    parseRepo =
+      parseMaybe $ \obj -> do
+        namespace <- obj .:? "namespace"
+        name <- obj .: "name"
+        return (namespace,name)
