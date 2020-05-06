@@ -8,7 +8,7 @@ Maintainer: Jens Petersen <petersen@redhat.com>
 Pagure REST client library
 -}
 
-module Web.Fedora.Pagure
+module Fedora.Pagure
   ( pagureProjectInfo
   , pagureListProjects
   , pagureListProjectIssues

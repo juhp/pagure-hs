@@ -40,7 +40,7 @@ library
   else
       build-depends:   lens, lens-aeson
   hs-source-dirs:      src
-  exposed-modules:     Web.Fedora.Pagure
+  exposed-modules:     Fedora.Pagure
 
   ghc-options:         -Wall
   if impl(ghc >= 8.0)
