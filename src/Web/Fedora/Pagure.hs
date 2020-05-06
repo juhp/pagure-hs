@@ -189,10 +189,7 @@ queryPagure server path params = do
 -- | single query
 queryPagureSingle :: String -> String -> Query -> IO (Either String Value)
 queryPagureSingle server path params = do
-  let url = "https://" ++ server </> "api/0" </> path
-  req <- setRequestQueryString params <$> parseRequest url
-  -- putStrLn $ url ++ B.unpack (queryString req)
-  res <- getResponseBody <$> httpJSON req
+  res <- queryPagure server path params
   if isJust (res ^? key "error") then
     return $ Left (res ^. key "error" . _String & T.unpack)
     else
