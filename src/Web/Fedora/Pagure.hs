@@ -206,9 +206,11 @@ queryPagureCount server path params pagination = do
 
 -- | get all pages of results
 --
--- Note this can potentially download very large amount of data
+-- Note this can potentially download very large amount of data.
+-- For potentially large queries, it is a good idea to queryPagureCount first.
 queryPagurePaged :: String -> String -> Query -> (String,String) -> IO [Value]
 queryPagurePaged server path params (pagination,paging) = do
+  -- FIXME allow overriding per_page
   res1 <- queryPagure server path (params ++ makeKey "per_page" "100")
   let mpages = res1 ^? key (T.pack pagination) . key "pages" . _Integer
   rest <- mapM nextPage [2..(fromMaybe 0 mpages)]
