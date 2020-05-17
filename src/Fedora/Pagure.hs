@@ -256,7 +256,7 @@ pagureUserRepos :: String -> String -> IO [Text]
 pagureUserRepos server user = do
   let path = "user" </> user
   pages <- queryPagurePaged server path [] ("repos_pagination", "repopage")
-  return $ concat $ map getRepos pages
+  return $ concatMap getRepos pages
   where
     getRepos :: Value -> [Text]
     getRepos result =
