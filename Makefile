@@ -5,6 +5,8 @@ stack-all:
 	@echo
 	stack $(FLAG) --resolver lts build
 	@echo
+	stack $(FLAG) --resolver lts-15 build
+	@echo
 	stack $(FLAG) --resolver lts-14 build
 	@echo
 	stack $(FLAG) --resolver lts-13 build
