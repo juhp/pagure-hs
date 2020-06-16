@@ -261,24 +261,7 @@ pagureUserRepos server user = do
 
 getRepos :: Text -> Value -> [Text]
 getRepos field result =
-  let repos = result ^.. key field . values . _Object
-    in map getRepo repos
-  where
-    getRepo :: Object -> T.Text
-    getRepo repo =
-      case parseRepo repo of
-        Nothing -> error "parsing repo failed"
-        Just (mnamespace,name) ->
-          case mnamespace of
-            Nothing -> name
-            Just nm -> T.concat [nm, T.singleton '/', name]
-      where
-        parseRepo :: Object -> Maybe (Maybe Text, Text)
-        parseRepo =
-          parseMaybe $ \obj -> do
-            namespace <- obj .:? "namespace"
-            name <- obj .: "name"
-            return (namespace,name)
+  result ^.. key field . values . key "fullname" . _String
 
 -- | list user's forks
 pagureUserForks :: String -> String -> IO [Text]
