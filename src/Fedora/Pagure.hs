@@ -17,6 +17,7 @@ module Fedora.Pagure
   , pagureListGitBranches
   , pagureListGitBranchesWithCommits
   , pagureListUsers
+  , pagureUserForks
   , pagureUserInfo
   , pagureUserRepos
   , pagureListGroups
@@ -256,13 +257,13 @@ pagureUserRepos :: String -> String -> IO [Text]
 pagureUserRepos server user = do
   let path = "user" </> user
   pages <- queryPagurePaged server path [] ("repos_pagination", "repopage")
-  return $ concatMap getRepos pages
-  where
-    getRepos :: Value -> [Text]
-    getRepos result =
-      let repos = result ^.. key (T.pack "repos") . values . _Object
-        in map getRepo repos
+  return $ concatMap (getRepos "repos") pages
 
+getRepos :: Text -> Value -> [Text]
+getRepos field result =
+  let repos = result ^.. key field . values . _Object
+    in map getRepo repos
+  where
     getRepo :: Object -> T.Text
     getRepo repo =
       case parseRepo repo of
@@ -271,10 +272,17 @@ pagureUserRepos server user = do
           case mnamespace of
             Nothing -> name
             Just nm -> T.concat [nm, T.singleton '/', name]
+      where
+        parseRepo :: Object -> Maybe (Maybe Text, Text)
+        parseRepo =
+          parseMaybe $ \obj -> do
+            namespace <- obj .:? "namespace"
+            name <- obj .: "name"
+            return (namespace,name)
 
-    parseRepo :: Object -> Maybe (Maybe Text, Text)
-    parseRepo =
-      parseMaybe $ \obj -> do
-        namespace <- obj .:? "namespace"
-        name <- obj .: "name"
-        return (namespace,name)
+-- | list user's forks
+pagureUserForks :: String -> String -> IO [Text]
+pagureUserForks server user = do
+  let path = "user" </> user
+  pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
+  return $ concatMap (getRepos "forks") pages
