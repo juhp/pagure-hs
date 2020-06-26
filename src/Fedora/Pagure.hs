@@ -12,7 +12,7 @@ module Fedora.Pagure
   ( pagureProjectInfo
   , pagureListProjects
   , pagureListProjectIssues
-  , pagureListProjectIssueTitles
+  , pagureListProjectIssueTitlesStatus
   , pagureProjectIssueInfo
   , pagureListGitBranches
   , pagureListGitBranchesWithCommits
@@ -96,22 +96,23 @@ pagureListProjectIssues server repo params = do
 -- | List project issue titles
 --
 -- https://pagure.io/api/0/#issues-tab
-pagureListProjectIssueTitles :: String -> String -> Query
-                             -> IO (Either String [(Integer,String,T.Text)])
-pagureListProjectIssueTitles server repo params = do
+pagureListProjectIssueTitlesStatus :: String -> String -> Query
+  -> IO (Either String [(Integer,String,T.Text,Maybe T.Text)])
+pagureListProjectIssueTitlesStatus server repo params = do
   let path = repo </> "issues"
   res <- queryPagureSingle server path params
   return $ case res of
     Left e -> Left e
     Right v -> Right $ v ^.. key (T.pack "issues") . values . _Object & mapMaybe parseIssue
   where
-    parseIssue :: Object -> Maybe (Integer, String, Text)
+    parseIssue :: Object -> Maybe (Integer, String, Text, Maybe Text)
     parseIssue =
       parseMaybe $ \obj -> do
         id' <- obj .: "id"
         title <- obj .: "title"
         status <- obj .: "status"
-        return (id',T.unpack title,status)
+        mclosedStatus <- obj .:? "closed_status"
+        return (id',T.unpack title,status,mclosedStatus)
 
 -- | Issue information
 --
