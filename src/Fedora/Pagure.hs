@@ -12,6 +12,7 @@ module Fedora.Pagure
   ( pagureProjectInfo
   , pagureListProjects
   , pagureListProjectIssues
+  , IssueTitleStatus(..)
   , pagureListProjectIssueTitlesStatus
   , pagureProjectIssueInfo
   , pagureListGitBranches
@@ -93,11 +94,18 @@ pagureListProjectIssues server repo params = do
   let path = repo </> "issues"
   queryPagureSingle server path params
 
+data IssueTitleStatus =
+  IssueTitleStatus { pagureIssueId :: Integer
+                   , pagureIssueTitle :: String
+                   , pagureIssueStatus :: T.Text
+                   , pagureIssueClosedStatus :: Maybe T.Text
+                   }
+
 -- | List project issue titles
 --
 -- https://pagure.io/api/0/#issues-tab
 pagureListProjectIssueTitlesStatus :: String -> String -> Query
-  -> IO (Either String [(Integer,String,T.Text,Maybe T.Text)])
+  -> IO (Either String [IssueTitleStatus])
 pagureListProjectIssueTitlesStatus server repo params = do
   let path = repo </> "issues"
   res <- queryPagureSingle server path params
@@ -105,14 +113,14 @@ pagureListProjectIssueTitlesStatus server repo params = do
     Left e -> Left e
     Right v -> Right $ v ^.. key (T.pack "issues") . values . _Object & mapMaybe parseIssue
   where
-    parseIssue :: Object -> Maybe (Integer, String, Text, Maybe Text)
+    parseIssue :: Object -> Maybe IssueTitleStatus
     parseIssue =
       parseMaybe $ \obj -> do
         id' <- obj .: "id"
         title <- obj .: "title"
         status <- obj .: "status"
         mclosedStatus <- obj .:? "closed_status"
-        return (id',T.unpack title,status,mclosedStatus)
+        return $ IssueTitleStatus id' (T.unpack title) status mclosedStatus
 
 -- | Issue information
 --
