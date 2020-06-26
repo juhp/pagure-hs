@@ -98,7 +98,7 @@ data IssueTitleStatus =
   IssueTitleStatus { pagureIssueId :: Integer
                    , pagureIssueTitle :: String
                    , pagureIssueStatus :: T.Text
-                   , pagureIssueClosedStatus :: Maybe T.Text
+                   , pagureIssueCloseStatus :: Maybe T.Text
                    }
 
 -- | List project issue titles
@@ -119,8 +119,8 @@ pagureListProjectIssueTitlesStatus server repo params = do
         id' <- obj .: "id"
         title <- obj .: "title"
         status <- obj .: "status"
-        mclosedStatus <- obj .:? "closed_status"
-        return $ IssueTitleStatus id' (T.unpack title) status mclosedStatus
+        mcloseStatus <- obj .:? "close_status"
+        return $ IssueTitleStatus id' (T.unpack title) status mcloseStatus
 
 -- | Issue information
 --
