@@ -44,28 +44,12 @@ import Data.Aeson.Lens
 import Lens.Micro
 import Lens.Micro.Aeson
 #endif
---import Network.HTTP.Conduit (queryString)
 import Data.Aeson.Types
-#if (defined(MIN_VERSION_http_conduit) && MIN_VERSION_http_conduit(2,3,3))
-#else
-import Data.ByteString (ByteString)
-#endif
-import qualified Data.ByteString.Char8 as B
 import Data.Maybe
 import Data.Text (Text)
 import qualified Data.Text as T
-import Network.HTTP.Simple
-import System.FilePath ((</>))
+import Network.HTTP.Query
 import System.IO (hPutStrLn, stderr)
-
-#if (defined(MIN_VERSION_http_conduit) && MIN_VERSION_http_conduit(2,3,1))
-#else
-type Query = [(ByteString, Maybe ByteString)]
-#endif
-#if (defined(MIN_VERSION_http_conduit) && MIN_VERSION_http_conduit(2,3,3))
-#else
-type QueryItem = (ByteString, Maybe ByteString)
-#endif
 
 -- | Project info
 --
@@ -91,7 +75,7 @@ pagureListProjects server params = do
 -- https://pagure.io/api/0/#issues-tab
 pagureListProjectIssues :: String -> String -> Query -> IO (Either String Value)
 pagureListProjectIssues server repo params = do
-  let path = repo </> "issues"
+  let path = repo +/+ "issues"
   queryPagureSingle server path params
 
 data IssueTitleStatus =
@@ -107,7 +91,7 @@ data IssueTitleStatus =
 pagureListProjectIssueTitlesStatus :: String -> String -> Query
   -> IO (Either String [IssueTitleStatus])
 pagureListProjectIssueTitlesStatus server repo params = do
-  let path = repo </> "issues"
+  let path = repo +/+ "issues"
   res <- queryPagureSingle server path params
   return $ case res of
     Left e -> Left e
@@ -127,7 +111,7 @@ pagureListProjectIssueTitlesStatus server repo params = do
 -- https://pagure.io/api/0/#issues-tab
 pagureProjectIssueInfo :: String -> String -> Int -> IO (Either String Object)
 pagureProjectIssueInfo server repo issue = do
-  let path = repo </> "issue" </> show issue
+  let path = repo +/+ "issue" +/+ show issue
   res <- queryPagureSingle server path []
   return $ case res of
     Left e -> Left e
@@ -138,7 +122,7 @@ pagureProjectIssueInfo server repo issue = do
 -- https://pagure.io/api/0/#projects-tab
 pagureListGitBranches :: String -> String -> IO (Either String [String])
 pagureListGitBranches server repo = do
-  let path = repo </> "git/branches"
+  let path = repo +/+ "git/branches"
   res <- queryPagureSingle server path []
   return $ case res of
     Left e -> Left e
@@ -149,7 +133,7 @@ pagureListGitBranches server repo = do
 -- https://pagure.io/api/0/#projects-tab
 pagureListGitBranchesWithCommits :: String -> String -> IO (Either String Object)
 pagureListGitBranchesWithCommits server repo = do
-  let path = repo </> "git/branches"
+  let path = repo +/+ "git/branches"
       params = makeKey "with_commits" "1"
   res <- queryPagureSingle server path params
   return $ case res of
@@ -170,7 +154,7 @@ pagureListUsers server pat = do
 -- https://pagure.io/api/0/#users-tab
 pagureUserInfo :: String -> String -> Query -> IO (Either String Value)
 pagureUserInfo server user params = do
-  let path = "user" </> user
+  let path = "user" +/+ user
   queryPagureSingle server path params
 
 -- | List groups
@@ -187,17 +171,15 @@ pagureListGroups server mpat paging = do
 -- https://pagure.io/api/0/#projects-tab
 pagureProjectGitURLs :: String -> String -> IO (Either String Value)
 pagureProjectGitURLs server repo = do
-  let path = repo </> "git/urls"
+  let path = repo +/+ "git/urls"
   queryPagureSingle server path []
 
 
 -- | low-level query
 queryPagure :: String -> String -> Query -> IO Value
-queryPagure server path params = do
-  let url = "https://" ++ server </> "api/0" </> path
-  req <- setRequestQueryString params <$> parseRequest url
-  -- putStrLn $ url ++ B.unpack (queryString req)
-  getResponseBody <$> httpJSON req
+queryPagure server path params =
+  let url = "https://" ++ server +/+ "api/0"
+  in webAPIQuery url path params
 
 -- | single query
 queryPagureSingle :: String -> String -> Query -> IO (Either String Value)
@@ -235,36 +217,10 @@ queryPagurePaged server path params (pagination,paging) = do
     nextPage p =
       queryPagure server path (params ++ makeKey "per_page" "100" ++ makeKey paging (show p))
 
--- | Maybe create a query key
-maybeKey :: String -> Maybe String -> Query
-maybeKey _ Nothing = []
-maybeKey k mval = [(B.pack k, fmap B.pack mval)]
-
--- | make a singleton key-value Query
-makeKey :: String -> String -> Query
-makeKey k val = [(B.pack k, Just (B.pack val))]
-
--- | make a key-value QueryItem
-makeItem :: String -> String -> QueryItem
-makeItem k val = (B.pack k, Just (B.pack val))
-
--- | looks up key in object
-lookupKey :: FromJSON a => Text -> Object -> Maybe a
-lookupKey k = parseMaybe (.: k)
-
--- -- | looks up Text from key in object
--- lookupText :: Text -> Object -> Maybe Text
--- lookupText k = parseMaybe (.: k)
-
--- | like lookupKey but raises an error if no key found
-lookupKey' :: FromJSON a => Text -> Object -> a
-lookupKey' k obj =
-  fromMaybe (error ("no key: " ++ show k)) (lookupKey k obj)
-
 -- | list user's repos
 pagureUserRepos :: String -> String -> IO [Text]
 pagureUserRepos server user = do
-  let path = "user" </> user
+  let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("repos_pagination", "repopage")
   return $ concatMap (getRepos "repos") pages
 
@@ -275,6 +231,6 @@ getRepos field result =
 -- | list user's forks
 pagureUserForks :: String -> String -> IO [Text]
 pagureUserForks server user = do
-  let path = "user" </> user
+  let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
   return $ concatMap (getRepos "forks") pages
