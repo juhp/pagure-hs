@@ -1,4 +1,4 @@
 resolver: lts-15.16
 extra-deps:
   - git: https://github.com/juhp/simple-query.git
-    commit: c23eadb370e5341facd4716044e3ae70a0a4ceab
+    commit: 95bfbbfde4c1ea1862fc4ed03bd5f0635253486e

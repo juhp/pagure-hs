@@ -1,0 +1,6 @@
+packages: .
+
+source-repository-package
+    type: git
+    location: https://github.com/juhp/http-query.git
+    tag: 95bfbbfde4c1ea1862fc4ed03bd5f0635253486e

@@ -178,8 +178,8 @@ pagureProjectGitURLs server repo = do
 -- | low-level query
 queryPagure :: String -> String -> Query -> IO Value
 queryPagure server path params =
-  let url = "https://" ++ server +/+ "api/0"
-  in webAPIQuery url path params
+  let url = "https://" ++ server +/+ "api/0" +/+ path
+  in webAPIQuery url params
 
 -- | single query
 queryPagureSingle :: String -> String -> Query -> IO (Either String Value)
