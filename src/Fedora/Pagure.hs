@@ -46,8 +46,10 @@ import System.IO (hPutStrLn, stderr)
 
 -- | Project info
 --
--- `pagureProjectInfo server "<repo>"`
--- `pagureProjectInfo server "<namespace>/<repo>"`
+-- @@
+-- pagureProjectInfo server "<repo>"
+-- pagureProjectInfo server "<namespace>/<repo>"
+-- @@
 --
 -- https://pagure.io/api/0/#projects-tab
 pagureProjectInfo :: String -> String -> IO (Either String Object)
