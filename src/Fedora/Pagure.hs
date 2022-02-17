@@ -125,7 +125,8 @@ pagureListGitBranches server repo = do
 -- | List repo branches with commits
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureListGitBranchesWithCommits :: String -> String -> IO (Either String Object)
+pagureListGitBranchesWithCommits :: String -> String
+                                 -> IO (Either String Object)
 pagureListGitBranchesWithCommits server repo = do
   let path = repo +/+ "git/branches"
       params = makeKey "with_commits" "1"
