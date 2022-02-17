@@ -24,6 +24,7 @@ module Fedora.Pagure
   , pagureListGroups
   , pagureProjectGitURLs
   , queryPagure
+  , queryPagure'
   , queryPagureSingle
   , queryPagurePaged
   , queryPagureCount
@@ -172,6 +173,14 @@ queryPagure :: String -> String -> Query -> IO Object
 queryPagure server path params =
   let url = "https://" ++ server +/+ "api/0" +/+ path
   in webAPIQuery url params
+
+-- | low-level query
+-- Like queryPagure but errors if JSON has "error" field:
+-- eg for a non-existent API query path
+queryPagure' :: String -> String -> Query -> IO Object
+queryPagure' server path params = do
+  eres <- queryPagureSingle server path params
+  either error return eres
 
 -- | single query
 queryPagureSingle :: String -> String -> Query -> IO (Either String Object)
