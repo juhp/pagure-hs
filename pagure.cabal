@@ -28,7 +28,7 @@ source-repository head
 library
   build-depends:       aeson
                      , base >= 4 && < 5
-                     , http-query
+                     , http-query >= 0.1.2
                      , text
   hs-source-dirs:      src
   exposed-modules:     Fedora.Pagure
