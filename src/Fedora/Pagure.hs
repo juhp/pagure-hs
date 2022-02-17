@@ -192,20 +192,23 @@ queryPagureSingle server path params = do
              Nothing -> Right res
 
 -- | count total number of hits
+-- FIXME: errors if the query fails
 queryPagureCount :: String -> String -> Query -> String -> IO (Maybe Integer)
 queryPagureCount server path params pagination = do
-  res <- queryPagure server path (params ++ makeKey "per_page" "1")
+  res <- queryPagure' server path (params ++ makeKey "per_page" "1")
   return $ lookupKey (T.pack pagination) res >>= lookupKey "pages"
 
 -- | get all pages of results
 --
--- Note this can potentially download very large amount of data.
+-- Warning: this can potentially download very large amounts of data.
 -- For potentially large queries, it is a good idea to queryPagureCount first.
+--
+-- Errors for a non-existent API path
 queryPagurePaged :: String -> String -> Query -> (String,String) -> IO [Object]
 queryPagurePaged server path params (pagination,paging) = do
   -- FIXME allow overriding per_page
   let maxPerPage = "100"
-  res1 <- queryPagure server path (params ++ makeKey "per_page" maxPerPage)
+  res1 <- queryPagure' server path (params ++ makeKey "per_page" maxPerPage)
   case (lookupKey (T.pack pagination) res1 :: Maybe Object) >>= lookupKey "pages" :: Maybe Int of
     Nothing -> return []
     Just pages -> do
