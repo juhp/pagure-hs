@@ -3,7 +3,7 @@
 [![Hackage](https://img.shields.io/hackage/v/pagure.svg?logo=haskell)](https://hackage.haskell.org/package/pagure)
 [![Stackage Lts](http://stackage.org/package/pagure/badge/lts)](http://stackage.org/lts/package/pagure)
 [![Stackage Nightly](http://stackage.org/package/pagure/badge/nightly)](http://stackage.org/nightly/package/pagure)
-[![GPL-2.0-only license](https://img.shields.io/badge/license-GPL--2.0--only-blue.svg)](LICENSE)
+[![GPL-2.0-or-later license](https://img.shields.io/badge/license-GPL--2.0--or--later-blue.svg)](LICENSE)
 
 Pagure REST client library.
 
