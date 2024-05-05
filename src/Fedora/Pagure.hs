@@ -22,6 +22,7 @@ module Fedora.Pagure
   , pagureUserInfo
   , pagureUserRepos
   , pagureListGroups
+  , pagureGroupInfo
   , pagureProjectGitURLs
   , queryPagure
   , queryPagure'
@@ -160,6 +161,14 @@ pagureListGroups server mpat paging = do
   let path = "groups"
       params = maybeKey "pattern" mpat ++ paging
   queryPagure server path params
+
+-- | Group information
+--
+-- https://pagure.io/api/0/#groups-tab
+pagureGroupInfo :: String -> String -> Query -> IO (Either String Object)
+pagureGroupInfo server group params = do
+  let path = "group" +/+ group
+  queryPagureSingle server path params
 
 -- | Project Git URLs
 --
