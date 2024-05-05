@@ -1,3 +1,0 @@
-resolver: lts-14.27
-extra-deps:
-  - http-query-0.1.2

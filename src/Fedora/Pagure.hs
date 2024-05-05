@@ -229,6 +229,8 @@ queryPagurePaged server path params (pagination,paging) = do
     nextPage p =
       queryPagure server path (params ++ makeKey "per_page" "100" ++ makeKey paging (show p))
 
+-- FIXME treat these as special cases/filters of userinfo
+
 -- | list user's repos
 pagureUserRepos :: String -> String -> IO [Text]
 pagureUserRepos server user = do
