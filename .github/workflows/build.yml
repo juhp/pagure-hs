@@ -30,4 +30,6 @@ jobs:
       - run: cabal update
       - run: cabal build
       - run: cabal haddock
+        if: ${{ matrix.ghc != '8.0' }}
+          # https://github.com/haskell/zlib/issues/72
       - run: cabal sdist
