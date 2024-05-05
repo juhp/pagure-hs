@@ -236,13 +236,13 @@ pagureUserRepos server user = do
   pages <- queryPagurePaged server path [] ("repos_pagination", "repopage")
   return $ concatMap (getRepos "repos") pages
 
-getRepos :: Text -> Object -> [Text]
-getRepos field obj =
-  map (lookupKey' "fullname") $ lookupKey' field obj
-
 -- | list user's forks
 pagureUserForks :: String -> String -> IO [Text]
 pagureUserForks server user = do
   let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
   return $ concatMap (getRepos "forks") pages
+
+getRepos :: Text -> Object -> [Text]
+getRepos field obj =
+  map (lookupKey' "fullname") $ lookupKey' field obj
