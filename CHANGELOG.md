@@ -2,6 +2,10 @@
 
 `pagure-hs` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 0.2.0 (2024-05-06)
+- remove queryPagure' which errored
+- queryPagureCount and queryPagurePaged: no longer error
+
 ## 0.1.2 (2024-05-05)
 - add pagureGroupInfo for group endpoint
 

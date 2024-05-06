@@ -25,7 +25,6 @@ module Fedora.Pagure
   , pagureGroupInfo
   , pagureProjectGitURLs
   , queryPagure
-  , queryPagure'
   , queryPagureSingle
   , queryPagurePaged
   , queryPagureCount
@@ -184,14 +183,6 @@ queryPagure server path params =
   let url = "https://" ++ server +/+ "api/0" +/+ path
   in webAPIQuery url params
 
--- | low-level query
--- Like queryPagure but errors if JSON has "error" field:
--- eg for a non-existent API query path
-queryPagure' :: String -> String -> Query -> IO Object
-queryPagure' server path params = do
-  eres <- queryPagureSingle server path params
-  either error return eres
-
 -- | single query
 queryPagureSingle :: String -> String -> Query -> IO (Either String Object)
 queryPagureSingle server path params = do
@@ -201,30 +192,37 @@ queryPagureSingle server path params = do
              Nothing -> Right res
 
 -- | count total number of hits
--- FIXME: errors if the query fails
 queryPagureCount :: String -> String -> Query -> String -> IO (Maybe Integer)
 queryPagureCount server path params pagination = do
-  res <- queryPagure' server path (params ++ makeKey "per_page" "1")
-  return $ lookupKey (T.pack pagination) res >>= lookupKey "pages"
+  eres <- queryPagureSingle server path (params ++ makeKey "per_page" "1")
+  case eres of
+    Left err -> do
+      putStrLn err
+      return Nothing
+    Right res ->
+      return $ lookupKey (T.pack pagination) res >>= lookupKey "pages"
 
 -- | get all pages of results
 --
 -- Warning: this can potentially download very large amounts of data.
 -- For potentially large queries, it is a good idea to queryPagureCount first.
---
--- Errors for a non-existent API path
 queryPagurePaged :: String -> String -> Query -> (String,String) -> IO [Object]
 queryPagurePaged server path params (pagination,paging) = do
   -- FIXME allow overriding per_page
   let maxPerPage = "100"
-  res1 <- queryPagure' server path (params ++ makeKey "per_page" maxPerPage)
-  case (lookupKey (T.pack pagination) res1 :: Maybe Object) >>= lookupKey "pages" :: Maybe Int of
-    Nothing -> return []
-    Just pages -> do
-      when (pages > 1) $
-        hPutStrLn stderr $ "receiving " ++ show pages ++ " pages × " ++ maxPerPage ++ " results..."
-      rest <- mapM nextPage [2..pages]
-      return $ res1 : rest
+  eres <- queryPagureSingle server path (params ++ makeKey "per_page" maxPerPage)
+  case eres of
+    Left err -> do
+      putStrLn err
+      return []
+    Right res1 ->
+      case (lookupKey (T.pack pagination) res1 :: Maybe Object) >>= lookupKey "pages" :: Maybe Int of
+        Nothing -> return []
+        Just pages -> do
+          when (pages > 1) $
+            hPutStrLn stderr $ "receiving " ++ show pages ++ " pages × " ++ maxPerPage ++ " results..."
+          rest <- mapM nextPage [2..pages]
+          return $ res1 : rest
   where
     nextPage p =
       queryPagure server path (params ++ makeKey "per_page" "100" ++ makeKey paging (show p))

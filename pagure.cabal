@@ -1,6 +1,6 @@
 cabal-version:       1.22
 name:                pagure
-version:             0.1.2
+version:             0.2.0
 synopsis:            Pagure REST client library
 description:         A library for querying Pagure gitforges via REST.
 homepage:            https://github.com/juhp/pagure-hs
@@ -24,6 +24,7 @@ tested-with:         GHC == 8.0.2
                      GHC == 9.2.8
                      GHC == 9.4.8
                      GHC == 9.6.5
+                     GHC == 9.8.2
 
 source-repository head
   type:                git
