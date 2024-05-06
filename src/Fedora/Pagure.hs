@@ -244,7 +244,7 @@ queryPagureCount server path params pagination = do
 queryPagurePaged :: String -- ^ server
                  -> String -- ^ api path
                  -> Query  -- ^ parameters
-                 -> (String,String) -- ^  pagination and paging
+                 -> (String,String) -- ^  pagination and paging names
                  -> IO [Object]
 queryPagurePaged server path params (pagination,paging) = do
   -- FIXME allow overriding per_page
