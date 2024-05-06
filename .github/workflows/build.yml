@@ -30,7 +30,8 @@ jobs:
       - run: cabal update
       - run: cabal build
       - run: cabal haddock
-        if: ${{ ! contains(fromJSON('["8.0", "8.4"]'), matrix.ghc) }}
+        if: ${{ ! contains(fromJSON('["8.0", "8.2", "8.4"]'), matrix.ghc) }}
           # zlib fails for 8.0
+          # vector fails for 8.2
           # http-types fails for 8.4
       - run: cabal sdist
