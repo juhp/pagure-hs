@@ -30,6 +30,7 @@ jobs:
       - run: cabal update
       - run: cabal build
       - run: cabal haddock
-        if: ${{ matrix.ghc != '8.0' }}
-          # https://github.com/haskell/zlib/issues/72
+        if: ${{ ! contains(fromJSON('["8.0", "8.4"]'), matrix.ghc) }}
+          # zlib fails for 8.0
+          # http-types fails for 8.4
       - run: cabal sdist
