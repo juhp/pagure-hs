@@ -47,13 +47,13 @@ import System.IO (hPutStrLn, stderr)
 
 -- | Project info
 --
--- @@
--- pagureProjectInfo server "<repo>"
--- pagureProjectInfo server "<namespace>/<repo>"
--- @@
+-- @pagureProjectInfo server "<repo>"@
+-- @pagureProjectInfo server "<namespace>/<repo>"@
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureProjectInfo :: String -> String -> IO (Either String Object)
+pagureProjectInfo :: String -- ^ server
+                  -> String -- ^ project
+                  -> IO (Either String Object)
 pagureProjectInfo server project = do
   let path = project
   queryPagureSingle server path []
@@ -61,7 +61,9 @@ pagureProjectInfo server project = do
 -- | List projects
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureListProjects :: String -> Query -> IO Object
+pagureListProjects :: String -- ^ server
+                   -> Query  -- ^ parameters
+                   -> IO Object
 pagureListProjects server params = do
   let path = "projects"
   queryPagure server path params
@@ -69,7 +71,9 @@ pagureListProjects server params = do
 -- | List project issues
 --
 -- https://pagure.io/api/0/#issues-tab
-pagureListProjectIssues :: String -> String -> Query
+pagureListProjectIssues :: String -- ^ server
+                        -> String -- ^ project repo
+                        -> Query  -- ^ parameters
                         -> IO (Either String Object)
 pagureListProjectIssues server repo params = do
   let path = repo +/+ "issues"
@@ -85,7 +89,9 @@ data IssueTitleStatus =
 -- | List project issue titles
 --
 -- https://pagure.io/api/0/#issues-tab
-pagureListProjectIssueTitlesStatus :: String -> String -> Query
+pagureListProjectIssueTitlesStatus :: String -- ^ server
+                                   -> String -- ^ repo
+                                   -> Query  -- ^ parameters
   -> IO (Either String [IssueTitleStatus])
 pagureListProjectIssueTitlesStatus server repo params = do
   let path = repo +/+ "issues"
@@ -106,7 +112,10 @@ pagureListProjectIssueTitlesStatus server repo params = do
 -- | Issue information
 --
 -- https://pagure.io/api/0/#issues-tab
-pagureProjectIssueInfo :: String -> String -> Int -> IO (Either String Object)
+pagureProjectIssueInfo :: String -- ^ server
+                       -> String -- ^ repo
+                       -> Int    -- ^ issue number
+                       -> IO (Either String Object)
 pagureProjectIssueInfo server repo issue = do
   let path = repo +/+ "issue" +/+ show issue
   queryPagureSingle server path []
@@ -114,7 +123,9 @@ pagureProjectIssueInfo server repo issue = do
 -- | List repo branches
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureListGitBranches :: String -> String -> IO (Either String [String])
+pagureListGitBranches :: String -- ^ server
+                      -> String -- ^ repo
+                      -> IO (Either String [String])
 pagureListGitBranches server repo = do
   let path = repo +/+ "git/branches"
   res <- queryPagureSingle server path []
@@ -125,7 +136,8 @@ pagureListGitBranches server repo = do
 -- | List repo branches with commits
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureListGitBranchesWithCommits :: String -> String
+pagureListGitBranchesWithCommits :: String -- ^ server
+                                 -> String -- ^ repo
                                  -> IO (Either String Object)
 pagureListGitBranchesWithCommits server repo = do
   let path = repo +/+ "git/branches"
@@ -138,7 +150,9 @@ pagureListGitBranchesWithCommits server repo = do
 -- | List users
 --
 -- https://pagure.io/api/0/#users-tab
-pagureListUsers :: String -> String -> IO Object
+pagureListUsers :: String -- ^ server
+                -> String -- ^ pattern
+                -> IO Object
 pagureListUsers server pat = do
   let path = "users"
       params = makeKey "pattern" pat
@@ -147,7 +161,10 @@ pagureListUsers server pat = do
 -- | User information
 --
 -- https://pagure.io/api/0/#users-tab
-pagureUserInfo :: String -> String -> Query -> IO (Either String Object)
+pagureUserInfo :: String -- ^ server
+               -> String -- ^ user
+               -> Query  -- ^ parameters
+               -> IO (Either String Object)
 pagureUserInfo server user params = do
   let path = "user" +/+ user
   queryPagureSingle server path params
@@ -155,7 +172,10 @@ pagureUserInfo server user params = do
 -- | List groups
 --
 -- https://pagure.io/api/0/#groups-tab
-pagureListGroups :: String -> Maybe String -> Query -> IO Object
+pagureListGroups :: String -- ^ server
+                 -> Maybe String -- ^ optional pattern
+                 -> Query  -- ^ parameters
+                 -> IO Object
 pagureListGroups server mpat paging = do
   let path = "groups"
       params = maybeKey "pattern" mpat ++ paging
@@ -164,7 +184,10 @@ pagureListGroups server mpat paging = do
 -- | Group information
 --
 -- https://pagure.io/api/0/#groups-tab
-pagureGroupInfo :: String -> String -> Query -> IO (Either String Object)
+pagureGroupInfo :: String -- ^ server
+                -> String -- ^ group
+                -> Query  -- ^ parameters
+                -> IO (Either String Object)
 pagureGroupInfo server group params = do
   let path = "group" +/+ group
   queryPagureSingle server path params
@@ -172,19 +195,27 @@ pagureGroupInfo server group params = do
 -- | Project Git URLs
 --
 -- https://pagure.io/api/0/#projects-tab
-pagureProjectGitURLs :: String -> String -> IO (Either String Object)
+pagureProjectGitURLs :: String -- ^ server
+                     -> String -- ^ repo
+                     -> IO (Either String Object)
 pagureProjectGitURLs server repo = do
   let path = repo +/+ "git/urls"
   queryPagureSingle server path []
 
 -- | low-level query
-queryPagure :: String -> String -> Query -> IO Object
+queryPagure :: String -- ^ server
+            -> String -- ^ api path
+            -> Query  -- ^ parameters
+            -> IO Object
 queryPagure server path params =
   let url = "https://" ++ server +/+ "api/0" +/+ path
   in webAPIQuery url params
 
 -- | single query
-queryPagureSingle :: String -> String -> Query -> IO (Either String Object)
+queryPagureSingle :: String -- ^ server
+                  -> String -- ^ api path
+                  -> Query  -- ^ parameters
+                  -> IO (Either String Object)
 queryPagureSingle server path params = do
   res <- queryPagure server path params
   return $ case lookupKey "error" res of
@@ -192,7 +223,11 @@ queryPagureSingle server path params = do
              Nothing -> Right res
 
 -- | count total number of hits
-queryPagureCount :: String -> String -> Query -> String -> IO (Maybe Integer)
+queryPagureCount :: String -- ^ server
+                 -> String -- ^ api path
+                 -> Query  -- ^ parameters
+                 -> String -- ^ pagination name
+                 -> IO (Maybe Integer)
 queryPagureCount server path params pagination = do
   eres <- queryPagureSingle server path (params ++ makeKey "per_page" "1")
   case eres of
@@ -206,7 +241,11 @@ queryPagureCount server path params pagination = do
 --
 -- Warning: this can potentially download very large amounts of data.
 -- For potentially large queries, it is a good idea to queryPagureCount first.
-queryPagurePaged :: String -> String -> Query -> (String,String) -> IO [Object]
+queryPagurePaged :: String -- ^ server
+                 -> String -- ^ api path
+                 -> Query  -- ^ parameters
+                 -> (String,String) -- ^  pagination and paging
+                 -> IO [Object]
 queryPagurePaged server path params (pagination,paging) = do
   -- FIXME allow overriding per_page
   let maxPerPage = "100"
@@ -230,14 +269,18 @@ queryPagurePaged server path params (pagination,paging) = do
 -- FIXME treat these as special cases/filters of userinfo
 
 -- | list user's repos
-pagureUserRepos :: String -> String -> IO [Text]
+pagureUserRepos :: String -- ^ server
+                -> String -- ^ user
+                -> IO [Text]
 pagureUserRepos server user = do
   let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("repos_pagination", "repopage")
   return $ concatMap (getRepos "repos") pages
 
 -- | list user's forks
-pagureUserForks :: String -> String -> IO [Text]
+pagureUserForks :: String -- ^ server
+                -> String -- ^ user
+                -> IO [Text]
 pagureUserForks server user = do
   let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
