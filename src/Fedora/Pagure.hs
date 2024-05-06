@@ -1,8 +1,8 @@
 {-# LANGUAGE CPP, OverloadedStrings #-}
 
 {- |
-Copyright: (c) 2020 Jens Petersen
-SPDX-License-Identifier: GPL-2.0-only
+Copyright: (c) 2020-2024 Jens Petersen
+SPDX-License-Identifier: GPL-2.0-or-later
 Maintainer: Jens Petersen <petersen@redhat.com>
 
 Pagure REST client library

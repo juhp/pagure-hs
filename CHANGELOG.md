@@ -2,6 +2,10 @@
 
 `pagure-hs` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 0.2.1 (2024-05-06)
+- add pagureGroupRepos
+- export getRepos helper
+
 ## 0.2.0 (2024-05-06)
 - queryPagureCountPaged replaces queryPagurePaged
 - warnings now go to stderr

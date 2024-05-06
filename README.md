@@ -8,7 +8,7 @@
 Pagure REST client library.
 
 [Pagure](https://pagure.io/pagure) is an opensource git forge
-(ie somewhat like gitlab).
+(ie somewhat like Gitlab).
 
 A primary instance is https://pagure.io,
 but pagure is also used to host all current Fedora packages
