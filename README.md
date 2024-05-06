@@ -10,8 +10,8 @@ Pagure REST client library.
 [Pagure](https://pagure.io/pagure) is an opensource git forge
 (ie somewhat like gitlab).
 
-The primary instance is https://pagure.io,
-but pagure is also used to host current Fedora package
-src.fedoraproject.org dist-git.
+A primary instance is https://pagure.io,
+but pagure is also used to host all current Fedora packages
+https://src.fedoraproject.org (aka dist-git).
 
 The API is at <https://pagure.io/api/0>.
