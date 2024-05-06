@@ -35,6 +35,7 @@ module Fedora.Pagure
   , QueryItem
   , lookupKey
   , lookupKey'
+  , getRepos
   ) where
 
 import Control.Monad
@@ -286,7 +287,10 @@ pagureUserForks server user = do
   pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
   return $ concatMap (getRepos "forks") pages
 
-getRepos :: Text -> Object -> [Text]
+-- | helper to extract fullnames of repos
+getRepos :: Text   -- ^ field (eg "repos")
+         -> Object -- ^ results page
+         -> [Text]
 getRepos field obj =
   map (lookupKey' "fullname") $ lookupKey' field obj
 
