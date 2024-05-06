@@ -23,6 +23,7 @@ module Fedora.Pagure
   , pagureUserRepos
   , pagureListGroups
   , pagureGroupInfo
+  , pagureGroupRepos
   , pagureProjectGitURLs
   , queryPagure
   , queryPagureSingle
@@ -267,8 +268,6 @@ queryPagurePaged server path params (pagination,paging) = do
     nextPage p =
       queryPagure server path (params ++ makeKey "per_page" "100" ++ makeKey paging (show p))
 
--- FIXME treat these as special cases/filters of userinfo
-
 -- | list user's repos
 pagureUserRepos :: String -- ^ server
                 -> String -- ^ user
@@ -286,6 +285,17 @@ pagureUserForks server user = do
   let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
   return $ concatMap (getRepos "forks") pages
+
+-- | list group's repos
+pagureGroupRepos :: String -- ^ server
+                 -> Bool -- ^ count
+                 -> String -- ^ group
+                 -> IO [Text]
+pagureGroupRepos server count group = do
+  let path = "group" +/+ group
+      params = makeKey "projects" "1"
+  pages <- queryPagureCountPaged server count path params ("pagination", "page")
+  return $ concatMap (getRepos "projects") pages
 
 -- | helper to extract fullnames of repos
 getRepos :: Text   -- ^ field (eg "repos")
