@@ -232,7 +232,7 @@ queryPagureCount server path params pagination = do
   eres <- queryPagureSingle server path (params ++ makeKey "per_page" "1")
   case eres of
     Left err -> do
-      putStrLn err
+      warning err
       return Nothing
     Right res ->
       return $ lookupKey (T.pack pagination) res >>= lookupKey "pages"
@@ -252,14 +252,14 @@ queryPagurePaged server path params (pagination,paging) = do
   eres <- queryPagureSingle server path (params ++ makeKey "per_page" maxPerPage)
   case eres of
     Left err -> do
-      putStrLn err
+      warning err
       return []
     Right res1 ->
       case (lookupKey (T.pack pagination) res1 :: Maybe Object) >>= lookupKey "pages" :: Maybe Int of
         Nothing -> return []
         Just pages -> do
           when (pages > 1) $
-            hPutStrLn stderr $ "receiving " ++ show pages ++ " pages × " ++ maxPerPage ++ " results..."
+            warning $ "receiving " ++ show pages ++ " pages × " ++ maxPerPage ++ " results..."
           rest <- mapM nextPage [2..pages]
           return $ res1 : rest
   where
@@ -289,3 +289,7 @@ pagureUserForks server user = do
 getRepos :: Text -> Object -> [Text]
 getRepos field obj =
   map (lookupKey' "fullname") $ lookupKey' field obj
+
+-- from simple-cmd
+warning :: String -> IO ()
+warning s = hPutStrLn stderr $! s

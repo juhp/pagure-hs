@@ -3,6 +3,7 @@
 `pagure-hs` uses [PVP Versioning](https://pvp.haskell.org).
 
 ## 0.2.0 (2024-05-06)
+- warnings now go to stderr
 - remove queryPagure' which errored
 - queryPagureCount and queryPagurePaged: no longer error
 
