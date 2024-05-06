@@ -26,8 +26,8 @@ module Fedora.Pagure
   , pagureProjectGitURLs
   , queryPagure
   , queryPagureSingle
-  , queryPagurePaged
   , queryPagureCount
+  , queryPagureCountPaged
   , makeKey
   , makeItem
   , maybeKey
@@ -289,6 +289,20 @@ pagureUserForks server user = do
 getRepos :: Text -> Object -> [Text]
 getRepos field obj =
   map (lookupKey' "fullname") $ lookupKey' field obj
+
+queryPagureCountPaged :: String -- ^ server
+           -> Bool   -- ^ count
+           -> String -- ^ api path
+           -> Query  -- ^ parameters
+           -> (String,String) -- ^ pagination and paging names
+           -> IO [Object]
+queryPagureCountPaged server count path params (pagination,paging) =
+  if count
+    then do
+    mnum <- queryPagureCount server path params pagination
+    maybe (warning "no results found") print mnum
+    return []
+    else queryPagurePaged server path params (pagination,paging)
 
 -- from simple-cmd
 warning :: String -> IO ()
