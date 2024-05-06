@@ -294,12 +294,13 @@ getRepos :: Text   -- ^ field (eg "repos")
 getRepos field obj =
   map (lookupKey' "fullname") $ lookupKey' field obj
 
+-- | Get count (with queryPagureCount) or full results (queryPagurePaged)
 queryPagureCountPaged :: String -- ^ server
-           -> Bool   -- ^ count
-           -> String -- ^ api path
-           -> Query  -- ^ parameters
-           -> (String,String) -- ^ pagination and paging names
-           -> IO [Object]
+                      -> Bool   -- ^ count
+                      -> String -- ^ api path
+                      -> Query  -- ^ parameters
+                      -> (String,String) -- ^ pagination and paging names
+                      -> IO [Object]
 queryPagureCountPaged server count path params (pagination,paging) =
   if count
     then do
