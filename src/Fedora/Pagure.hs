@@ -28,6 +28,7 @@ module Fedora.Pagure
   , queryPagure
   , queryPagureSingle
   , queryPagureCount
+  , queryPagurePaged
   , queryPagureCountPaged
   , makeKey
   , makeItem
