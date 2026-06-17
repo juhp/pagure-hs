@@ -15,16 +15,24 @@ module Fedora.Pagure
   , IssueTitleStatus(..)
   , pagureListProjectIssueTitlesStatus
   , pagureProjectIssueInfo
+  , pagureListProjectPRs
+  , pagureProjectPRInfo
   , pagureListGitBranches
   , pagureListGitBranchesWithCommits
   , pagureListUsers
   , pagureUserRepos
   , pagureUserForks
   , pagureUserInfo
+  , pagureUserActivityStats
+  , pagureUserActivityDate
+  , pagureUserIssues
+  , pagureUserRequestsFiled
+  , pagureUserRequestsActionable
   , pagureListGroups
   , pagureGroupInfo
   , pagureGroupRepos
   , pagureProjectGitURLs
+  , pagureProjectContributors
   , queryPagure
   , queryPagureSingle
   , queryPagureCount
@@ -123,6 +131,29 @@ pagureProjectIssueInfo server repo issue = do
   let path = repo +/+ "issue" +/+ show issue
   queryPagureSingle server path []
 
+-- | List project pull-requests
+--
+-- https://pagure.io/api/0/#pull_requests-tab
+pagureListProjectPRs :: String -- ^ server
+                     -> String -- ^ project repo
+                     -> Query  -- ^ parameters
+                     -> IO (Either String Object)
+pagureListProjectPRs server repo params = do
+  let path = repo +/+ "pull-requests"
+  queryPagureSingle server path params
+
+-- | Pull request information
+--
+-- https://pagure.io/api/0/#pull_requests-tab
+pagureProjectPRInfo :: String -- ^ server
+                       -> String -- ^ repo
+                       -> Int    -- ^ issue number
+                       -> IO (Either String Object)
+pagureProjectPRInfo server repo issue = do
+  let path = repo +/+ "pull-request" +/+ show issue
+  queryPagureSingle server path []
+
+
 -- | List repo branches
 --
 -- https://pagure.io/api/0/#projects-tab
@@ -172,6 +203,36 @@ pagureUserInfo server user params = do
   let path = "user" +/+ user
   queryPagureSingle server path params
 
+-- | Conditional param
+boolKey :: Bool -> String -> String -> Query
+boolKey False _ _ = []
+boolKey True k val = makeKey k val
+
+-- | User Activity stats
+--
+-- https://pagure.io/api/0/#users-tab
+pagureUserActivityStats :: String -- ^ server
+                   -> Bool -- ^ unix time
+                   -> String -- ^ user
+                   -> IO (Either String Object)
+pagureUserActivityStats server unixtime user = do
+  let path = "user" +/+ user +/+ "activity/stats"
+      params = boolKey unixtime "format" "timestamp"
+  queryPagureSingle server path params
+
+-- | User Activity on date
+--
+-- https://pagure.io/api/0/#users-tab
+pagureUserActivityDate :: String -- ^ server
+                       -> Bool -- ^ grouped
+                       -> String -- ^ user
+                       -> String -- ^ iso date
+                       -> IO (Either String Object)
+pagureUserActivityDate server grouped user date = do
+  let path = "user" +/+ user +/+ "activity" +/+ date
+      params = boolKey grouped "grouped" "true"
+  queryPagureSingle server path params
+
 -- | List groups
 --
 -- https://pagure.io/api/0/#groups-tab
@@ -203,6 +264,16 @@ pagureProjectGitURLs :: String -- ^ server
                      -> IO (Either String Object)
 pagureProjectGitURLs server repo = do
   let path = repo +/+ "git/urls"
+  queryPagureSingle server path []
+
+-- | Project contributors
+--
+-- https://pagure.io/api/0/#projects-tab
+pagureProjectContributors :: String -- ^ server
+                          -> String -- ^ repo
+                          -> IO (Either String Object)
+pagureProjectContributors server repo = do
+  let path = repo +/+ "contributors"
   queryPagureSingle server path []
 
 -- | low-level query
@@ -286,6 +357,44 @@ pagureUserForks server user = do
   let path = "user" +/+ user
   pages <- queryPagurePaged server path [] ("forks_pagination", "forkpage")
   return $ concatMap (getRepos "forks") pages
+
+-- | User Activity on date
+--
+-- https://pagure.io/api/0/#users-tab
+pagureUserIssues :: String -- ^ server
+                 -> Bool -- ^ grouped
+                 -> String -- ^ user
+                 -> IO [Object]
+pagureUserIssues server count user = do
+  let path = "user" +/+ user +/+ "issues"
+      params = []
+  queryPagureCountPaged server count path params ("pagination", "page")
+
+-- | User's filed pull requests
+--
+-- https://pagure.io/api/0/#users-tab
+pagureUserRequestsFiled :: String -- ^ server
+                        -> Bool   -- ^ count
+                        -> String -- ^ status
+                        -> String -- ^ user
+                        -> IO [Object]
+pagureUserRequestsFiled server count status user = do
+  let path = "user" +/+ user +/+ "requests/filed"
+      params = makeKey "status" status
+  queryPagureCountPaged server count path params ("pagination", "page")
+
+-- | User's actionable pull requests
+--
+-- https://pagure.io/api/0/#users-tab
+pagureUserRequestsActionable :: String -- ^ server
+                           -> Bool   -- ^ count
+                           -> String -- ^ status
+                           -> String -- ^ user
+                           -> IO [Object]
+pagureUserRequestsActionable server count status user = do
+  let path = "user" +/+ user +/+ "requests/actionable"
+      params = makeKey "status" status
+  queryPagureCountPaged server count path params ("pagination", "page")
 
 -- | list group's repos
 pagureGroupRepos :: String -- ^ server
