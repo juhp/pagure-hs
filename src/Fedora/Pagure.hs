@@ -18,9 +18,9 @@ module Fedora.Pagure
   , pagureListGitBranches
   , pagureListGitBranchesWithCommits
   , pagureListUsers
+  , pagureUserRepos
   , pagureUserForks
   , pagureUserInfo
-  , pagureUserRepos
   , pagureListGroups
   , pagureGroupInfo
   , pagureGroupRepos
