@@ -1,6 +1,6 @@
-cabal-version:       1.22
+cabal-version:       1.24
 name:                pagure
-version:             0.2.1
+version:             0.2.2
 synopsis:            Pagure REST client library
 description:         A library for querying a Pagure gitforge via REST
 homepage:            https://github.com/juhp/pagure-hs
@@ -9,7 +9,7 @@ license:             GPL-2
 license-file:        LICENSE
 author:              Jens Petersen <petersen@redhat.com>
 maintainer:          Jens Petersen <petersen@redhat.com>
-copyright:           2020-2022, 2024 Jens Petersen <petersen@redhat.com>
+copyright:           2020-2022,2024,2026 Jens Petersen <petersen@redhat.com>
 category:            Network
 build-type:          Simple
 extra-doc-files:     README.md
@@ -24,7 +24,9 @@ tested-with:         GHC == 8.0.2
                      GHC == 9.2.8
                      GHC == 9.4.8
                      GHC == 9.6.5
-                     GHC == 9.8.2
+                     GHC == 9.8.4
+                     GHC == 9.10.3
+                     GHC == 9.12.4
 
 source-repository head
   type:                git

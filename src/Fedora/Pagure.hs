@@ -97,6 +97,7 @@ data IssueTitleStatus =
                    , pagureIssueCloseStatus :: Maybe T.Text
                    }
 
+-- FIXME move to pagure-cli
 -- | List project issue titles
 --
 -- https://pagure.io/api/0/#issues-tab

@@ -2,6 +2,14 @@
 
 `pagure-hs` uses [PVP Versioning](https://pvp.haskell.org).
 
+## 0.2.2 (2026-06-17)
+- export queryPagurePaged
+- add pagureListProjectPRs and pagureProjectPRInfo
+- add pagureUserActivityStats and pagureUserActivityDate
+- add pagureUserIssues
+- add pagureUserRequestsFiled, and pagureUserRequestsActionable
+- add pagureProjectContributors
+
 ## 0.2.1 (2024-05-06)
 - add pagureGroupRepos
 - export getRepos helper
