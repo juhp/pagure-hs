@@ -95,7 +95,7 @@ data IssueTitleStatus =
 pagureListProjectIssueTitlesStatus :: String -- ^ server
                                    -> String -- ^ repo
                                    -> Query  -- ^ parameters
-  -> IO (Either String [IssueTitleStatus])
+                                   -> IO (Either String [IssueTitleStatus])
 pagureListProjectIssueTitlesStatus server repo params = do
   let path = repo +/+ "issues"
   res <- queryPagureSingle server path params
