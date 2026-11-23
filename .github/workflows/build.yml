@@ -30,7 +30,7 @@ jobs:
       - run: |
           sudo apt-get update
           sudo apt-get -y install binutils-gold
-        if: ${{ ! contains(fromJSON('["9.2"]'), matrix.ghc) }}
+        if: ${{ contains(fromJSON('["9.2"]'), matrix.ghc) }}
       - run: cabal update
       - run: cabal build
       - run: cabal haddock
