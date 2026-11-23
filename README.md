@@ -14,3 +14,5 @@ but pagure is currently also used to host all Fedora packages
 https://src.fedoraproject.org (aka dist-git).
 
 The API is at <https://pagure.io/api/0>.
+
+This library is distributed under GPLv2+.
